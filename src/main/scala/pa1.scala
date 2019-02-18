@@ -39,3 +39,4 @@ object Hits {
       .map(x => (x._2 + 1, x._1)) 
   }
 }
+
