@@ -1,1 +1,10 @@
-(2L, "solar_eclipse"),(5L,"Eclipse_of_the_heart"),(4L, "colorado"), (1L, "whatever"),(3L, "monkeys"),(6L, "test"),(7L, "snow"),(8L, "fun"),(9L, "ski"),(10L, "computer_science")
+solar_eclipse
+Eclipse_of_the_heart
+colorado
+whatever
+monkeys
+test
+snow
+fun
+ski
+computer_science
