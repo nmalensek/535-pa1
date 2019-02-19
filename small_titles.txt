@@ -1,3 +1,1 @@
 (2L, "solar_eclipse"),(5L,"Eclipse_of_the_heart"),(4L, "colorado"), (1L, "whatever"),(3L, "monkeys"),(6L, "test"),(7L, "snow"),(8L, "fun"),(9L, "ski"),(10L, "computer_science")
-
-("1: 2 7 8"),("2: 5 10"),("3: 6 8 9"),("4: 1"),("5: 8 6 2"),("6: 9 10 1"),("7: 9"),("8: 9 10 2"),("9: 7 6"),("10: 4")
