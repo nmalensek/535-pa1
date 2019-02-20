@@ -44,30 +44,38 @@ object Hits {
     //****
     // dunno if anything works past this point
     //****
-    var authScores = baseSetLinks.map(x => (x._1, 1.0))
+    var authScores = baseSetPages.map(x => (x._1, 1.0))
     var hubScores = authScores
   
     while(true) {
-      //calculate hub scores
-      //calculate authority scores
+    //calculate authority scores
+    var authStep1 = baseSetLinks.join(hubScores).map(x => (x._2._1, x._2._2)).reduceByKey((x, y) => x+y)
+    var totalHub = authStep1.values.sum()
+    authScores = authStep1.map(x => (x._1, (x._2/totalHub))).rightOuterJoin(hubScores).map(x => (x._1,x._2._1.getOrElse(0.0)))
+    
+    //calculate hub scores
     }
 
 /**
-    val step1 = baseSetLinks.join(hubScores).map(x => (x._2._1, x._2._2))
-    //Array[(Long, Double)] = Array((2,1.0), (5,1.0), (10,1.0), (6,1.0), (8,1.0), (2,1.0), (2,1.0))
+    var step1 = baseSetLinks.join(hubScores).map(x => (x._2._1, x._2._2))
+    //Array[(Long, Double)] = Array((1,1.0), (8,1.0), (2,1.0), (7,1.0), (2,1.0), (10,1.0), (5,1.0), (1,1.0), (2,1.0))
 
-    val step2 = step1.reduceByKey((x, y) => x+y)
-    //Array[(Long, Double)] = Array((2,3.0), (5,1.0), (6,1.0), (8,1.0), (10,1.0))
+    var step2 = step1.reduceByKey((x, y) => x+y)
+    //Array[(Long, Double)] = Array((1,2.0), (7,1.0), (8,1.0), (2,3.0), (10,1.0), (5,1.0))
 
-    val step3 = step2.rightOuterJoin(hubScores).map(x => (x._1,x._2._1.getOrElse(0)))
-    //Array[(Long, AnyVal)] = Array((1,0), (2,3.0), (5,1.0), (6,1.0), (8,1.0), (10,1.0))
-    //take these and divide each of them by the normalization value (7 in this example case)
+    var totalHub = step2.values.sum()
+    //9.0
+
+    var step3 = step2.map(x => (x._1, (x._2/totalHub)))
+    //Array[(Long, Double)] = Array((1,0.2222222222222222), (7,0.1111111111111111), (8,0.1111111111111111), (2,0.3333333333333333), (10,0.1111111111111111), (5,0.1111111111111111))
     
-    var normalize = step2.values.sum()
-    //7.0
+    var authScores = step3.rightOuterJoin(hubScores).map(x => (x._1,x._2._1.getOrElse(0.0)))
+    //Array[(Long, Double)] = Array((6,0.0), (1,0.2222222222222222), (7,0.1111111111111111), (8,0.1111111111111111), (2,0.3333333333333333), (4,0.0), (10,0.1111111111111111), (5,0.1111111111111111))
 
-    //next step map back to hub score w/ division
-    hubScores = step3.
+    var hStep1 = baseSetLinks.map(x => (x._2,x._1)).join(authScores).map(x => (x._2._1,x._2._2))
+    //Array[(Long, Double)] = Array((1,0.1111111111111111), (1,0.1111111111111111), (1,0.3333333333333333), (2,0.1111111111111111), (2,0.1111111111111111), (4,0.2222222222222222), (5,0.3333333333333333), (6,0.2222222222222222), (8,0.3333333333333333))
+
+
     */
   }
 
