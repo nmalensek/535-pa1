@@ -39,36 +39,31 @@ object Hits {
     val baseSetPages = fromRootToOther.map(x => (x._2,x._1)).union(fromOtherToRoot).reduceByKey((x, y) => x)
                       .join(allTitles).map(x => (x._1, x._2._2)).union(rootSet).reduceByKey((x, y) => x)
     baseSetPages.cache()
-    baseSetPages.coalesce(1).saveAsTextFile(outputPath + "baseSet/")
+    baseSetPages.sortByKey().coalesce(1).saveAsTextFile(outputPath + "baseSet/")
 
-    //****
-    // dunno if anything works past this point
-    //****
-    var authScores = baseSetLinks.map(x => (x._1, 1.0))
+    var authScores = baseSetPages.map(x => (x._1, 1.0))
     var hubScores = authScores
   
-    while(true) {
-      //calculate hub scores
-      //calculate authority scores
-    }
+  for (i <- 1 to 20) {//hardcoded iters for now
+      val absAuthScores = baseSetLinks.join(hubScores).values.reduceByKey(_ + _)
+      val sumVal = absAuthScores.values.sum()
+      authScores = absAuthScores.mapValues(x => x/sumVal)
 
-/**
-    val step1 = baseSetLinks.join(hubScores).map(x => (x._2._1, x._2._2))
-    //Array[(Long, Double)] = Array((2,1.0), (5,1.0), (10,1.0), (6,1.0), (8,1.0), (2,1.0), (2,1.0))
+      val absHubScores = baseSetLinks.map(x => (x._2, x._1)).join(authScores).values.reduceByKey(_ + _)
+      val sumVal2 = absHubScores.values.sum()
+      hubScores = absHubScores.mapValues(x => x/sumVal2)
+    }  
 
-    val step2 = step1.reduceByKey((x, y) => x+y)
-    //Array[(Long, Double)] = Array((2,3.0), (5,1.0), (6,1.0), (8,1.0), (10,1.0))
+    val roundedAuthScores = authScores.map(x => (x._1, BigDecimal(x._2).setScale(7, BigDecimal.RoundingMode.HALF_UP)))
+    val roundedHubScores = hubScores.map(x => (x._1, BigDecimal(x._2).setScale(7, BigDecimal.RoundingMode.HALF_UP)))
 
-    val step3 = step2.rightOuterJoin(hubScores).map(x => (x._1,x._2._1.getOrElse(0)))
-    //Array[(Long, AnyVal)] = Array((1,0), (2,3.0), (5,1.0), (6,1.0), (8,1.0), (10,1.0))
-    //take these and divide each of them by the normalization value (7 in this example case)
-    
-    var normalize = step2.values.sum()
-    //7.0
+    val authTitles = roundedAuthScores.join(baseSetPages).values.sortByKey(false).map(x => (x._2, x._1))
+    authTitles.cache()
+    authTitles.coalesce(1).saveAsTextFile(outputPath + "authTitles/")
 
-    //next step map back to hub score w/ division
-    hubScores = step3.
-    */
+    val hubTitles = roundedHubScores.join(baseSetPages).values.sortByKey(false).map(x => (x._2, x._1))
+    hubTitles.cache()
+    hubTitles.coalesce(1).saveAsTextFile(outputPath + "hubTitles/")    
   }
 
   def getRootSet(filePath: String, word: String, sc: SparkContext) : (RDD[(Long,String)], RDD[(Long, String)]) = {
