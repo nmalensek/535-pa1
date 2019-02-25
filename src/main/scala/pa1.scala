@@ -44,7 +44,7 @@ object Hits {
     var authScores = baseSetPages.map(x => (x._1, 1.0))
     var hubScores = authScores
   
-  for (i <- 1 to 20) {//hardcoded iters for now
+  for (i <- 1 to 25) {
       val absAuthScores = baseSetLinks.join(hubScores).values.reduceByKey(_ + _)
       val sumVal = absAuthScores.values.sum()
       authScores = absAuthScores.mapValues(x => x/sumVal)
